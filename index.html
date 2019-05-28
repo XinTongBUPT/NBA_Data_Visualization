@@ -1,0 +1,135 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>NBA Data Visualization</title>
+		<!-- import script -->
+		<script src="echarts.js" type="text/javascript" charset="utf-8"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+	</head>
+	<body>
+		<div id="details"></div>
+    	<div id="main" style="width: 600px;height:400px;"></div>
+    <script type="text/javascript">
+
+    	//globle variables
+    	var playerNumber = 0
+    	var resArr = new Array();
+    	var csvdata = []
+
+    	//fetch data from .csv
+    	fetch("player_normalizated.csv")
+		  .then(v => v.text())
+		  .then(data => {
+
+		  	//split String into array
+		  	var arr = []
+		  	arr = data.split(/[\n]/)
+		  	for(i = 0; i < arr.length; ++i) {
+		  		var temp = []
+		  		temp = arr[i].split(/[,\r]/)
+		  		resArr[i] = temp
+		  	}
+
+		  	//set the details div as a table, showing the data from .csv
+		  	var table = "<table><th>PLAYER</th><th>PTS</th><th>FGP</th><th>P3PP</th><th>FTP</th><th>REB</th><th>AST</th><th>STL</th><th>BLK</th><th>TOV</th><th>EFF</th>"
+		  	
+		  	for(var i=0;i<resArr.length;i++){
+		  		table += "<tr><td><button type='button' onclick = 'changePlayer("+i+")'>"+resArr[i][0]+"<button></td>"
+		  		for(var j=1;j<resArr[i].length;j++){
+		  			table += "<td>"+resArr[i][j]+"</td>"
+		  		}
+		  		table += "</tr>"
+		  	}
+		  	table += "</table>"
+		  	$("#details").html(table)
+
+		  	drawRadar()
+		})
+
+		//onclick function
+    	function changePlayer(item){
+    		playerNumber = item
+    		drawRadar()
+    	}
+
+    	//draw the radar chart
+	    function drawRadar(){
+
+		  	// initialize echarts
+	        var myChart = echarts.init(document.getElementById('main'));
+	        var nbaData = resArr[playerNumber].slice(1,11)
+
+	        var option = {
+			    title: {
+			        text: 'NBA Data Visualization'
+			    },
+			    tooltip: {},
+			    legend: {
+			        data: [resArr[playerNumber][0], 'Average']
+			    },
+			    radar: {
+			        // shape: 'circle',
+			        name: {
+			            textStyle: {
+			                color: '#fff',
+			                backgroundColor: '#999',
+			                borderRadius: 3,
+			                padding: [3, 5]
+			           }
+			        },
+			        indicator: [
+	                    { text: 'PTS', max: 32 },
+	                    { text: 'FGP', max: 74 },
+	                    { text: 'P3PP', max: 50 },
+	                    { text: 'FTP', max: 95 },
+	                    { text: 'REB', max: 13 },
+	                    { text: 'AST', max: 11 },
+	                    { text: 'STL', max: 3 },
+	                    { text: 'BLK', max: 2.5 },
+	                    { text: 'TOV', max: 5 },
+	                    { text: 'EFF', max: 40 }
+	                ]
+			    },
+			    series: [{
+			        name: '预算 vs 开销（Budget vs spending）',
+			        type: 'radar',
+			        data : [
+			            {
+			                value:nbaData,
+			                name : resArr[playerNumber][0],
+			                label: {
+		                        normal: {
+		                            show: true,
+		                            formatter:function(params) {
+		                                return params.value;
+		                            }
+		                        }
+		                    }
+			            },
+			             {
+			                value:[21.5,44.1,31.7,83.2,6.4,4.7,1.2,0.6,2.6,21],
+			                name : 'Average',
+			                label: {
+		                        normal: {
+		                            formatter:function(params) {
+		                                return params.value;
+		                            }
+		                        }
+		                    }
+			            }
+			        ]
+			    }]
+			};
+
+	        myChart.setOption(option);
+		 
+		}
+
+
+
+        
+    </script>
+	</body>
+</html>
